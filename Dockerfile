@@ -1,17 +1,28 @@
 FROM frappe/erpnext:v14
 
-USER frappe
+USER root
+
 WORKDIR /home/frappe/frappe-bench
 
-# 1. Bypass the Node.js version block for the frontend compiler
+# Allow yarn to continue even if some packages have engine mismatch
 RUN yarn config set ignore-engines true
 
-# 2. Create a dummy config file to satisfy the compiler's Redis and SocketIO checks during build
+# Create basic Frappe site config for build stage
 RUN mkdir -p sites && \
-    echo '{"redis_cache": "redis://redis", "redis_queue": "redis://redis", "redis_socketio": "redis://redis", "socketio_port": 9000}' > sites/common_site_config.json
+    echo '{"redis_cache": "redis://redis:6379", "redis_queue": "redis://redis:6379", "redis_socketio": "redis://redis:6379"}' > sites/common_site_config.json
 
-# 3. Download Marley and automatically install its required dependencies (Healthcare module)
-RUN bench get-app --resolve-deps https://github.com/earthians/marley.git
+# Switch back to frappe user
+USER frappe
 
-# 4. Force compile the frontend web assets
-RUN bench build --app marley
+# Get Healthcare app
+RUN bench get-app healthcare --branch version-14
+
+# Build Healthcare assets
+RUN bench build --app healthcare
+
+# IMPORTANT:
+# Do not run `bench build --app marley`
+# Your Coolify deployment failed because marley asset build produced:
+# TypeError [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string. Received undefined
+# So we skip marley frontend asset build.
+# RUN bench build --app marley
