@@ -40,4 +40,4 @@ chown -R frappe:frappe sites && \
 if [ ! -f sites/apps.txt ]; then printf 'frappe\\nerpnext\\nhealthcare\\n' > sites/apps.txt; fi && \
 chown frappe:frappe sites/apps.txt && \
 python - <<'PY'\nimport os, json\nconf = {\n  'db_host': os.environ.get('DB_HOST'),\n  'db_port': int(os.environ.get('DB_PORT', '3306')),\n  'redis_cache': os.environ.get('REDIS_CACHE'),\n  'redis_queue': os.environ.get('REDIS_QUEUE'),\n  'redis_socketio': os.environ.get('REDIS_SOCKETIO'),\n  'socketio_port': 9000,\n  'webserver_port': 8000\n}\nconf = {k:v for k,v in conf.items() if v is not None}\nwith open('sites/common_site_config.json', 'w') as f:\n    json.dump(conf, f)\nPY\nchown frappe:frappe sites/common_site_config.json && \
-su frappe -c 'cd /home/frappe/frappe-bench && bench serve --host 0.0.0.0 --port 8000 --noreload'"]
+su frappe -c 'cd /home/frappe/frappe-bench && bench serve --port 8000 --noreload'"]
