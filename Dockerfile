@@ -6,9 +6,9 @@ WORKDIR /home/frappe/frappe-bench
 # 1. Bypass the Node.js version block for the frontend compiler
 RUN yarn config set ignore-engines true
 
-# 2. Create a dummy config file to satisfy the compiler's Redis check during build
+# 2. Create a dummy config file to satisfy the compiler's Redis and SocketIO checks during build
 RUN mkdir -p sites && \
-    echo '{"redis_cache": "redis://redis", "redis_queue": "redis://redis", "redis_socketio": "redis://redis"}' > sites/common_site_config.json
+    echo '{"redis_cache": "redis://redis", "redis_queue": "redis://redis", "redis_socketio": "redis://redis", "socketio_port": 9000}' > sites/common_site_config.json
 
 # 3. Download Marley and automatically install its required dependencies (Healthcare module)
 RUN bench get-app --resolve-deps https://github.com/earthians/marley.git
