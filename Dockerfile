@@ -1,8 +1,10 @@
 FROM frappe/erpnext:v14
 
-# Switch to the frappe user to ensure file permissions stay secure
 USER frappe
 WORKDIR /home/frappe/frappe-bench
+
+# Tell yarn to ignore the strict Node version requirement
+RUN yarn config set ignore-engines true
 
 # Download and inject the Marley EMR interface into your server
 RUN bench get-app https://github.com/earthians/marley.git
