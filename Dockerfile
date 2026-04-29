@@ -12,9 +12,9 @@ ENV PYTHONUNBUFFERED=1
 RUN yarn config set ignore-engines true
 
 # Create temporary Frappe config for build/runtime
+
 RUN mkdir -p sites && \
-    printf '{"redis_cache":"redis://redis:6379","redis_queue":"redis://redis:6379","redis_socketio":"redis://redis:6379","socketio_port":9000,"webserver_port":8000}\n' > sites/common_site_config.json && \
-    printf 'frontend\n' > sites/currentsite.txt && \
+    printf '{"db_host":"mariadb","db_port":3306,"redis_cache":"redis://redis:6379","redis_queue":"redis://redis:6379","redis_socketio":"redis://redis:6379","socketio_port":9000,"webserver_port":8000}\n' > sites/common_site_config.json && \
     chown -R frappe:frappe sites
 
 USER frappe
