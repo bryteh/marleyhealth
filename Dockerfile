@@ -4,25 +4,23 @@ USER root
 
 WORKDIR /home/frappe/frappe-bench
 
-# Allow yarn to continue even if some packages have engine mismatch
+# Allow yarn install even if package engine versions do not match
 RUN yarn config set ignore-engines true
 
-# Create basic Frappe site config for build stage
+# Create temporary Frappe config for Docker build stage
+# This fixes the Redis URL error during bench build
 RUN mkdir -p sites && \
-    echo '{"redis_cache": "redis://redis:6379", "redis_queue": "redis://redis:6379", "redis_socketio": "redis://redis:6379"}' > sites/common_site_config.json
+    printf '{"redis_cache":"redis://redis:6379","redis_queue":"redis://redis:6379","redis_socketio":"redis://redis:6379","socketio_port":9000}\n' > sites/common_site_config.json && \
+    chown -R frappe:frappe sites
 
-# Switch back to frappe user
 USER frappe
 
-# Get Healthcare app
-RUN bench get-app healthcare --branch version-14
+# Download Marley and its dependency apps, including Healthcare
+# --skip-assets prevents automatic build during get-app
+RUN bench get-app --resolve-deps --skip-assets https://github.com/earthians/marley.git
 
-# Build Healthcare assets
+# Build Healthcare assets only
 RUN bench build --app healthcare
 
-# IMPORTANT:
-# Do not run `bench build --app marley`
-# Your Coolify deployment failed because marley asset build produced:
-# TypeError [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string. Received undefined
-# So we skip marley frontend asset build.
+# Do NOT build Marley assets
 # RUN bench build --app marley
